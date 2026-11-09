@@ -1,0 +1,30 @@
+.mini {
+  position: fixed;
+  left: 20rpx;
+  right: 20rpx;
+  bottom: 20rpx;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  height: 104rpx;
+  padding: 0 20rpx;
+  border-radius: 20rpx;
+  background: #ffffff;
+  box-shadow: 0 6rpx 28rpx rgba(0, 0, 0, 0.12);
+}
+.cover { width: 68rpx; height: 68rpx; border-radius: 12rpx; flex: none; background: #eef2f7; }
+.cover-empty { background: #dce7f3; }
+.info { flex: 1; min-width: 0; margin-left: 18rpx; }
+.name { font-size: 26rpx; }
+.album { color: #6b7280; font-size: 22rpx; margin-top: 4rpx; }
+.ctrl {
+  flex: none;
+  margin-left: 12rpx;
+  padding: 8rpx 18rpx;
+  border-radius: 999rpx;
+  background: #185fa5;
+  color: #ffffff;
+  font-size: 24rpx;
+}
+.ctrl-next { background: #eef2f7; color: #185fa5; }
+.ellipsis { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }

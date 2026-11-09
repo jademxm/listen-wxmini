@@ -1,0 +1,31 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/album/album",
+    "pages/player/player",
+    "pages/history/history",
+    "pages/mine/mine"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "枕书",
+    "backgroundColor": "#f7f8fa",
+    "enablePullDownRefresh": false
+  },
+  "tabBar": {
+    "color": "#6b7280",
+    "selectedColor": "#185fa5",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      { "pagePath": "pages/index/index", "text": "枕书" },
+      { "pagePath": "pages/history/history", "text": "最近" },
+      { "pagePath": "pages/mine/mine", "text": "我的" }
+    ]
+  },
+  "requiredBackgroundModes": ["audio"],
+  "lazyCodeLoading": "requiredComponents",
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

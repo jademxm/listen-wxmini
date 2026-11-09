@@ -1,0 +1,95 @@
+<view class="container">
+  <view class="page-head">
+    <view class="page-title">我的</view>
+    <view class="muted">听过的，都在这里</view>
+  </view>
+
+  <view wx:if="{{error}}" class="card error-card">
+    <view class="muted">{{error}}</view>
+    <view class="btn ghost" bindtap="onRetry">重试</view>
+  </view>
+
+  <view class="section-title">收听成绩单</view>
+  <view class="card score-row">
+    <view class="score">
+      <view class="score-num">{{scores.finishedTracks}}</view>
+      <view class="muted">已听完（集）</view>
+    </view>
+    <view class="score">
+      <view class="score-num score-text">{{scores.finishedContent}}</view>
+      <view class="muted">累计听完</view>
+    </view>
+    <view class="score">
+      <view class="score-num">{{scores.listenedAlbums}}</view>
+      <view class="muted">听过专辑（张）</view>
+    </view>
+  </view>
+  <view class="hint">累计听完 = 已听完集数的内容总长，按当前上架内容重算。</view>
+
+  <view class="section-head">
+    <view class="section-title">成就徽章</view>
+    <text class="section-note">达成即点亮</text>
+  </view>
+  <view class="card badge-wall">
+    <view class="badge-wall-head">
+      <text class="badge-count">{{litCount}} / {{badgeTotal}} 已点亮</text>
+      <text class="badge-wall-sub">亮 · 已达成　暗 · 未达成</text>
+    </view>
+    <view class="badge-grid">
+      <view wx:for="{{badges}}" wx:key="id"
+            class="badge tone-{{item.tone}} {{item.lit ? 'is-lit' : 'is-dim'}}"
+            hover-class="badge--pressed" hover-stay-time="80"
+            data-index="{{index}}" bindtap="onBadge">
+        <view class="badge-medal">
+          <view class="medal-ring"></view>
+          <view class="glyph glyph-{{item.icon}}">
+            <view class="g a"></view><view class="g b"></view><view class="g c"></view><view class="g d"></view>
+          </view>
+          <view wx:if="{{item.lit}}" class="badge-spark"></view>
+        </view>
+        <view class="badge-name">{{item.name}}</view>
+        <view class="badge-progress"><view class="badge-progress-inner" style="width:{{item.progress}}%"></view></view>
+        <view class="badge-hint">{{item.hint}}</view>
+      </view>
+    </view>
+    <view class="badge-legend tone-indigo">
+      <view class="legend-chip is-lit"></view><text class="badge-legend-text">亮 · 已达成</text>
+      <view class="legend-chip is-dim"></view><text class="badge-legend-text">暗 · 未达成</text>
+    </view>
+  </view>
+
+  <view class="section-title">专辑完成度</view>
+  <view wx:if="{{albums.length}}" class="card">
+    <view wx:for="{{albums}}" wx:key="albumId" class="album-item"
+          data-id="{{item.albumId}}" data-title="{{item.title}}" bindtap="onAlbum">
+      <image wx:if="{{item.cover}}" class="album-cover" src="{{item.cover}}" mode="aspectFill" />
+      <view wx:else class="album-cover cover-empty"></view>
+      <view class="album-info">
+        <view class="title ellipsis">{{item.title}}</view>
+        <view class="muted">{{item.finished ? '已通关' : item.text}}</view>
+        <view class="progress-bar"><view class="progress-inner" style="width:{{item.percent}}%"></view></view>
+      </view>
+      <view class="muted album-percent">{{item.percent}}%</view>
+    </view>
+  </view>
+  <view wx:else class="card empty-inline">
+    <view class="muted">还没有听过的专辑</view>
+    <view class="btn ghost" bindtap="onGoCatalog">去枕书</view>
+  </view>
+
+  <view class="section-title">工具</view>
+  <view class="card tool-list">
+    <view class="tool" bindtap="onSleepEntry"><text>定时关闭</text><text class="muted">前往播放页 ›</text></view>
+    <view class="tool" bindtap="onClearCache"><text>清空本地缓存</text><text class="muted">保留登录与待报记录 ›</text></view>
+    <view class="tool" bindtap="onClearHistory"><text class="danger">清空播放历史</text><text class="muted">重置统计与徽章 ›</text></view>
+    <view class="tool"><text>版本</text><text class="muted">{{version}}</text></view>
+  </view>
+
+  <view wx:if="{{loading}}" class="muted loading-tip">加载中…</view>
+  <view wx:if="{{loaded && !albums.length && !scores.finishedTracks}}" class="empty-inline center">
+    <view class="muted">还没有收听记录，去枕书听第一集吧</view>
+    <view class="btn" bindtap="onGoCatalog">去枕书</view>
+  </view>
+</view>
+
+<mini-player />

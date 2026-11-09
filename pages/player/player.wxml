@@ -1,0 +1,69 @@
+<view class="container">
+  <view wx:if="{{!hasTrack}}" class="empty">还没有播放内容，去枕书选一集吧</view>
+
+  <block wx:else>
+    <view class="cover-wrap">
+      <image wx:if="{{cover}}" class="cover" src="{{cover}}" mode="aspectFill" />
+      <view wx:else class="cover cover-empty"></view>
+    </view>
+
+    <view class="meta">
+      <view class="song-title ellipsis">{{title}}</view>
+      <view class="muted ellipsis">{{albumTitle}} · {{indexText}}</view>
+    </view>
+
+    <view class="progress">
+      <slider
+        min="0" max="100" step="1"
+        value="{{sliderValue}}"
+        activeColor="#185fa5"
+        backgroundColor="#e5e7eb"
+        block-size="14"
+        bindchanging="onSliderChanging"
+        bindchange="onSliderChange"
+      />
+      <view class="time-row">
+        <text class="muted">{{currentText}}</text>
+        <text class="muted">{{durationText}}</text>
+      </view>
+    </view>
+
+    <view class="controls">
+      <view class="ctrl-side" bindtap="onPrev">上一首</view>
+      <view class="ctrl-main" bindtap="onToggle">{{isPlaying ? '暂停' : '播放'}}</view>
+      <view class="ctrl-side" bindtap="onNext">下一首</view>
+    </view>
+
+    <view class="card timer">
+      <view class="section-title">定时关闭</view>
+      <view class="timer-row">
+        <view class="chip {{sleepMode == 'none' ? 'active' : ''}}" bindtap="onSleepCancel">关闭</view>
+        <view
+          wx:for="{{presets}}"
+          wx:key="*this"
+          class="chip"
+          data-minutes="{{item}}"
+          bindtap="onSleepPreset"
+        >{{item}} 分钟</view>
+        <view class="chip {{sleepMode == 'finishCurrent' ? 'active' : ''}}" bindtap="onSleepFinishCurrent">播完当前</view>
+      </view>
+
+      <view class="custom-row">
+        <input
+          class="minutes-input"
+          type="number"
+          placeholder="自定义分钟"
+          value="{{customMinutes}}"
+          bindinput="onCustomInput"
+        />
+        <view class="btn plain" bindtap="onCustomConfirm">设置</view>
+      </view>
+
+      <view wx:if="{{sleepRemainText}}" class="sleep-status">{{sleepRemainText}}</view>
+      <view wx:if="{{!sleepSupported}}" class="warn">当前微信版本不支持系统级定时，锁屏后定时可能不生效，建议保持小程序在前台。</view>
+      <view wx:else class="muted timer-note">系统级计时在锁屏 / 切后台后仍然生效。</view>
+    </view>
+
+    <view class="card link" bindtap="openAlbum">查看本专辑全部音频 ›</view>
+  </block>
+</view>

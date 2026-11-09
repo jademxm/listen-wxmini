@@ -1,0 +1,13 @@
+.album-head { margin: 12rpx 8rpx 28rpx; }
+.album-head .title { font-size: 38rpx; font-weight: 500; }
+.album-head .muted { margin-top: 8rpx; }
+.list { padding: 8rpx 24rpx; }
+.track { display: flex; align-items: center; padding: 24rpx 0; border-bottom: 1rpx solid #eceff3; }
+.track:last-child { border-bottom: none; }
+.index { width: 56rpx; color: #9ca3af; font-size: 26rpx; flex: none; }
+.track-info { flex: 1; min-width: 0; }
+.track-title { font-size: 28rpx; }
+.track-info .muted { margin-top: 6rpx; }
+.track-active .track-title { color: #185fa5; }
+.playing { color: #185fa5; font-size: 22rpx; flex: none; margin-left: 12rpx; }
+.ellipsis { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }

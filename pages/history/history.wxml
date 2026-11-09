@@ -1,0 +1,35 @@
+<view class="container">
+  <view class="page-head">
+    <view class="page-title">最近播放</view>
+    <view wx:if="{{list.length}}" class="muted clear" catchtap="clearAll">清空</view>
+  </view>
+
+  <view wx:if="{{loading && !list.length}}" class="empty">加载中…</view>
+  <view wx:elif="{{error && !list.length}}" class="card">
+    <view class="muted">{{error}}</view>
+    <view class="btn" style="margin-top:20rpx" bindtap="onRetry">重试</view>
+  </view>
+  <view wx:elif="{{!list.length}}" class="empty">还没有播放记录，去枕书听一集吧</view>
+
+  <view wx:for="{{list}}" wx:key="trackId" class="card item">
+    <view class="row" data-index="{{index}}" bindtap="continuePlay">
+      <image wx:if="{{item.cover}}" class="cover" src="{{item.cover}}" mode="aspectFill" />
+      <view wx:else class="cover cover-empty"></view>
+      <view class="info">
+        <view class="title ellipsis">{{item.title}}</view>
+        <view class="muted ellipsis">{{item.albumTitle}} · {{item.timeText}}</view>
+        <view class="progress-bar"><view class="progress-inner" style="width:{{item.percent}}%"></view></view>
+        <view class="muted">{{item.finished ? '已听完' : item.progressText}}{{item.durationText}}</view>
+      </view>
+    </view>
+    <view class="item-foot">
+      <view class="btn ghost" data-index="{{index}}" catchtap="continuePlay">继续播放</view>
+      <view class="muted remove" data-id="{{item.trackId}}" catchtap="remove">删除记录</view>
+    </view>
+  </view>
+
+  <view wx:if="{{loading && list.length}}" class="empty">加载中…</view>
+  <view wx:if="{{!hasMore && list.length}}" class="muted" style="text-align:center;padding:20rpx">没有更多了</view>
+</view>
+
+<mini-player />

@@ -1,0 +1,32 @@
+<view class="container">
+  <view class="album-head">
+    <view class="title">{{title}}</view>
+    <view class="muted">共 {{tracks.length}} 集 · 点击开始播放</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="empty">加载中…</view>
+  <view wx:elif="{{error}}" class="card">
+    <view class="muted">{{error}}</view>
+    <view class="btn" style="margin-top:20rpx" bindtap="onRetry">重试</view>
+  </view>
+  <view wx:elif="{{!tracks.length}}" class="empty">这个专辑还没有音频</view>
+
+  <view wx:else class="card list">
+    <view
+      wx:for="{{tracks}}"
+      wx:key="id"
+      class="track {{item.id == currentId ? 'track-active' : ''}}"
+      data-index="{{index}}"
+      bindtap="playTap"
+    >
+      <view class="index">{{index + 1}}</view>
+      <view class="track-info">
+        <view class="track-title ellipsis">{{item.title}}</view>
+        <view class="muted">{{item.durationText}}</view>
+      </view>
+      <view class="playing" wx:if="{{item.id === currentId}}">正在播放</view>
+    </view>
+  </view>
+</view>
+
+<mini-player />

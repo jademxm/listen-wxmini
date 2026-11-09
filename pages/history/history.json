@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "最近播放",
+  "usingComponents": {
+    "mini-player": "/components/mini-player/mini-player"
+  }
+}

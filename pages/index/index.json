@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "枕书",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "mini-player": "/components/mini-player/mini-player"
+  }
+}

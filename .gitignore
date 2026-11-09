@@ -1,0 +1,18 @@
+# macOS
+.DS_Store
+
+# 微信开发者工具：本地个人配置（每位开发者不同，不入库）
+project.private.config.json
+
+# 依赖与构建产物
+node_modules/
+miniprogram_npm/
+pack_npm_plugin/
+
+# 编辑器
+.idea/
+.vscode/
+
+# 日志与打包产物
+*.log
+*.zip

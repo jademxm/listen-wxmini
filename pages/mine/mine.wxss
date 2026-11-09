@@ -1,0 +1,165 @@
+.page-head { display: flex; align-items: baseline; justify-content: space-between; margin: 12rpx 8rpx 8rpx; }
+.page-title { font-size: 40rpx; font-weight: 500; }
+.error-card { display: flex; align-items: center; justify-content: space-between; }
+.hint { color: #9ca3af; font-size: 22rpx; line-height: 1.6; padding: 4rpx 8rpx 0; }
+
+.cover-empty { background: #dce7f3; }
+.progress-bar { height: 6rpx; border-radius: 6rpx; background: #eceff3; margin: 14rpx 0 8rpx; }
+.progress-inner { height: 6rpx; border-radius: 6rpx; background: #185fa5; }
+
+.score-row { display: flex; align-items: center; }
+.score { flex: 1; text-align: center; min-width: 0; }
+.score-num { font-size: 48rpx; font-weight: 500; color: #185fa5; line-height: 1.4; }
+.score-text { font-size: 30rpx; }
+
+/* ── 成就徽章墙（v1.2 / CR-02）───────────────────────────────────────────
+   亮 = 已达成，暗 = 未达成。页面只有一种浅色主题，没有明暗模式切换。
+   8 枚图标全部是纯 CSS 线性几何，每枚复用 .glyph 里的 4 个 part，
+   通过 --ink 变量随亮/暗换色；不依赖图片资源、外部字体或伪元素。      */
+.section-head { display: flex; align-items: baseline; justify-content: space-between; margin: 28rpx 0 16rpx; }
+.section-head .section-title { margin: 0; }
+.section-note { font-size: 22rpx; color: #8a93a2; }
+
+.card.badge-wall {
+  --wall-ink: #1f2937;
+  --wall-sub: #7b8492;
+  --wall-line: #edf0f4;
+  --dim-surface: #eef1f5;
+  --dim-ring: #cfd7e2;
+  --dim-ink: #8d9aab;
+  --dim-track: #e6eaf0;
+  --dim-fill: #b3bdca;
+  background: #ffffff;
+  color: var(--wall-ink);
+  padding: 24rpx 16rpx 20rpx;
+}
+.badge-wall-head { display: flex; align-items: baseline; justify-content: space-between; padding: 0 8rpx 18rpx; border-bottom: 1rpx solid var(--wall-line); }
+.badge-count { font-size: 26rpx; font-weight: 600; letter-spacing: 0.02em; color: #185fa5; }
+.badge-wall-sub { font-size: 20rpx; color: var(--wall-sub); }
+.badge-grid { display: flex; flex-wrap: wrap; padding-top: 22rpx; }
+
+/* 4 组色系 × 2 枚：Material 3 tonal 渐变，柔光晕不压过图标 */
+.tone-indigo { --tone-a: #5b8def; --tone-b: #2456b8; --tone-glow: rgba(52, 102, 210, 0.28); }
+.tone-teal { --tone-a: #38b7a6; --tone-b: #0d7469; --tone-glow: rgba(24, 150, 138, 0.28); }
+.tone-amber { --tone-a: #f0ad55; --tone-b: #b56a16; --tone-glow: rgba(214, 140, 45, 0.28); }
+.tone-rose { --tone-a: #e1859f; --tone-b: #a13d62; --tone-glow: rgba(198, 86, 126, 0.28); }
+
+.badge { width: 25%; box-sizing: border-box; padding: 10rpx 6rpx 18rpx; text-align: center; transition: transform 150ms ease; }
+.badge--pressed { transform: scale(0.96); }
+.badge-medal { position: relative; width: 100rpx; height: 100rpx; margin: 0 auto 14rpx; border-radius: 50%; }
+.badge.is-lit .badge-medal {
+  background: linear-gradient(150deg, var(--tone-a), var(--tone-b));
+  box-shadow: 0 8rpx 20rpx var(--tone-glow), inset 0 2rpx 3rpx rgba(255, 255, 255, 0.36);
+  animation: lb-badge-pop 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.badge.is-dim .badge-medal { background: var(--dim-surface); border: 2rpx dashed var(--dim-ring); box-sizing: border-box; }
+.medal-ring { position: absolute; top: 8rpx; right: 8rpx; bottom: 8rpx; left: 8rpx; border-radius: 50%; border: 2rpx solid rgba(255, 255, 255, 0.56); }
+.badge.is-dim .medal-ring { display: none; }
+.badge-spark { position: absolute; top: 2rpx; right: 6rpx; width: 12rpx; height: 12rpx; border-radius: 50%; background: #ffe9b8; box-shadow: 0 0 10rpx 3rpx rgba(255, 214, 130, 0.65); }
+
+/* 图标基座：亮态白色线条，暗态灰阶线条 */
+.glyph { position: absolute; top: 0; right: 0; bottom: 0; left: 0; --ink: #ffffff; }
+.badge.is-dim .glyph { --ink: var(--dim-ink); }
+.glyph .g { position: absolute; display: none; box-sizing: border-box; }
+
+/* ① 开卷有益 · 翻开的书：两页 + 书脊 + 页上文字线 */
+.glyph-book .a, .glyph-book .b {
+  display: block; top: 34rpx; width: 23rpx; height: 32rpx;
+  border: 3rpx solid var(--ink); border-radius: 5rpx 2rpx 2rpx 5rpx;
+}
+.glyph-book .a { left: 25rpx; transform: skewY(-7deg); }
+.glyph-book .b { left: 52rpx; border-radius: 2rpx 5rpx 5rpx 2rpx; transform: skewY(7deg); }
+.glyph-book .c { display: block; left: 49rpx; top: 33rpx; width: 2rpx; height: 34rpx; background: var(--ink); }
+.glyph-book .d {
+  display: block; left: 31rpx; top: 43rpx; width: 10rpx; height: 2rpx; background: var(--ink);
+  box-shadow: 28rpx 0 0 var(--ink), 0 8rpx 0 var(--ink), 28rpx 8rpx 0 var(--ink);
+}
+
+/* ② 渐入佳境 · 三级阶梯 */
+.glyph-steps .a, .glyph-steps .b, .glyph-steps .c { display: block; width: 11rpx; border-radius: 3rpx; background: var(--ink); }
+.glyph-steps .a { left: 29rpx; top: 54rpx; height: 14rpx; }
+.glyph-steps .b { left: 45rpx; top: 44rpx; height: 24rpx; }
+.glyph-steps .c { left: 61rpx; top: 32rpx; height: 36rpx; }
+.glyph-steps .d { display: block; left: 26rpx; top: 70rpx; width: 49rpx; height: 3rpx; border-radius: 2rpx; background: var(--ink); }
+
+/* ③ 博览群书 · 三本叠放的书 */
+.glyph-stack .a, .glyph-stack .b, .glyph-stack .c {
+  display: block; height: 11rpx; border: 3rpx solid var(--ink); border-radius: 3rpx;
+}
+.glyph-stack .a { left: 27rpx; top: 56rpx; width: 46rpx; }
+.glyph-stack .b { left: 31rpx; top: 44rpx; width: 40rpx; }
+.glyph-stack .c { left: 35rpx; top: 32rpx; width: 34rpx; }
+.glyph-stack .d { display: block; left: 61rpx; top: 47rpx; width: 2rpx; height: 6rpx; background: var(--ink); }
+
+/* ④ 一集不落 · 圆环对勾 */
+.glyph-check .a { display: block; left: 29rpx; top: 29rpx; width: 42rpx; height: 42rpx; border: 3rpx solid var(--ink); border-radius: 50%; }
+.glyph-check .b, .glyph-check .c { display: block; height: 3rpx; border-radius: 2rpx; background: var(--ink); transform-origin: 0 50%; }
+.glyph-check .b { left: 40rpx; top: 49rpx; width: 11rpx; transform: rotate(45deg); }
+.glyph-check .c { left: 46rpx; top: 56rpx; width: 22rpx; transform: rotate(-45deg); }
+
+/* ⑤ 长篇耐力 · 卷轴 */
+.glyph-scroll .a { display: block; left: 35rpx; top: 32rpx; width: 30rpx; height: 36rpx; border: 3rpx solid var(--ink); border-radius: 3rpx; }
+.glyph-scroll .b, .glyph-scroll .c { display: block; left: 29rpx; width: 42rpx; height: 8rpx; border-radius: 4rpx; background: var(--ink); }
+.glyph-scroll .b { top: 27rpx; }
+.glyph-scroll .c { top: 65rpx; }
+.glyph-scroll .d {
+  display: block; left: 42rpx; top: 43rpx; width: 16rpx; height: 2rpx; background: var(--ink);
+  box-shadow: 0 8rpx 0 var(--ink), 0 16rpx 0 var(--ink);
+}
+
+/* ⑥ 十小时俱乐部 · 奖杯 */
+.glyph-trophy .a { display: block; left: 37rpx; top: 30rpx; width: 26rpx; height: 32rpx; border: 3rpx solid var(--ink); border-radius: 3rpx 3rpx 13rpx 13rpx; }
+.glyph-trophy .b, .glyph-trophy .c { display: block; top: 33rpx; width: 12rpx; height: 17rpx; border: 3rpx solid var(--ink); }
+.glyph-trophy .b { left: 28rpx; border-right: none; border-radius: 9rpx 0 0 9rpx; }
+.glyph-trophy .c { left: 60rpx; border-left: none; border-radius: 0 9rpx 9rpx 0; }
+.glyph-trophy .d { display: block; left: 36rpx; top: 65rpx; width: 28rpx; height: 5rpx; border-radius: 3rpx; background: var(--ink); }
+
+/* ⑦ 老听众 · 耳机 */
+.glyph-headphone .a { display: block; left: 31rpx; top: 27rpx; width: 38rpx; height: 40rpx; border: 3rpx solid var(--ink); border-bottom: none; border-radius: 22rpx 22rpx 0 0; }
+.glyph-headphone .b, .glyph-headphone .c { display: block; top: 56rpx; width: 12rpx; height: 19rpx; border-radius: 6rpx; background: var(--ink); }
+.glyph-headphone .b { left: 27rpx; }
+.glyph-headphone .c { left: 61rpx; }
+
+/* ⑧ 书海漫游 · 帆船与波浪 */
+.glyph-sail .a { display: block; left: 48rpx; top: 26rpx; width: 3rpx; height: 39rpx; background: var(--ink); }
+.glyph-sail .b {
+  display: block; left: 52rpx; top: 29rpx; width: 0; height: 0;
+  border-left: 20rpx solid var(--ink);
+  border-top: 14rpx solid transparent;
+  border-bottom: 14rpx solid transparent;
+}
+.glyph-sail .c { display: block; left: 28rpx; top: 64rpx; width: 44rpx; height: 11rpx; border-radius: 2rpx 2rpx 14rpx 14rpx; background: var(--ink); }
+.glyph-sail .d { display: block; left: 26rpx; top: 79rpx; width: 48rpx; height: 3rpx; border-radius: 2rpx; background: var(--ink); box-shadow: 0 6rpx 0 var(--ink); }
+
+.badge-name { font-size: 23rpx; font-weight: 500; color: var(--wall-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.badge.is-dim .badge-name { color: #566273; }
+.badge-hint { font-size: 19rpx; line-height: 1.4; color: var(--wall-sub); min-height: 28rpx; }
+.badge-progress { height: 6rpx; margin: 12rpx 10rpx 8rpx; border-radius: 6rpx; background: var(--dim-track); overflow: hidden; }
+.badge-progress-inner { height: 100%; border-radius: 6rpx; background: var(--dim-fill); transition: width 300ms ease; }
+.badge.is-lit .badge-progress-inner { background: linear-gradient(90deg, var(--tone-a), var(--tone-b)); }
+
+.badge-legend { display: flex; align-items: center; justify-content: center; padding-top: 16rpx; border-top: 1rpx solid var(--wall-line); }
+.legend-chip { width: 22rpx; height: 22rpx; border-radius: 50%; margin-left: 14rpx; }
+.legend-chip.is-lit { background: linear-gradient(150deg, var(--tone-a), var(--tone-b)); box-shadow: 0 2rpx 8rpx var(--tone-glow); }
+.legend-chip.is-dim { background: var(--dim-surface); border: 1rpx dashed var(--dim-ring); box-sizing: border-box; }
+.badge-legend-text { font-size: 20rpx; color: var(--wall-sub); margin: 0 6rpx 0 8rpx; }
+
+@keyframes lb-badge-pop {
+  0% { transform: scale(0.86); opacity: 0.35; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.album-item { display: flex; align-items: center; padding: 18rpx 0; border-bottom: 1rpx solid #f0f2f5; }
+.album-item:last-child { border-bottom: none; }
+.album-cover { width: 88rpx; height: 88rpx; border-radius: 12rpx; flex: none; background: #eef2f7; }
+.album-info { flex: 1; min-width: 0; margin-left: 20rpx; }
+.album-percent { margin-left: 16rpx; }
+.empty-inline { display: flex; align-items: center; justify-content: space-between; }
+.empty-inline.center { flex-direction: column; padding: 40rpx 0; }
+.empty-inline.center .btn { margin-top: 20rpx; }
+
+.tool-list { padding: 0 24rpx; }
+.tool { display: flex; align-items: center; justify-content: space-between; padding: 26rpx 0; border-bottom: 1rpx solid #f0f2f5; }
+.tool:last-child { border-bottom: none; }
+.danger { color: #a32d2d; }
+.loading-tip { text-align: center; padding: 16rpx 0; }

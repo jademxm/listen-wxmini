@@ -1,0 +1,32 @@
+.cover-wrap { display: flex; justify-content: center; margin: 20rpx 0 40rpx; }
+.cover { width: 440rpx; height: 440rpx; border-radius: 28rpx; background: #eef2f7; }
+.cover-empty { background: #dce7f3; }
+.meta { text-align: center; margin-bottom: 30rpx; padding: 0 40rpx; }
+.song-title { font-size: 38rpx; font-weight: 500; }
+.meta .muted { margin-top: 12rpx; }
+.progress { padding: 0 20rpx; }
+.time-row { display: flex; justify-content: space-between; margin-top: -10rpx; }
+.controls { display: flex; align-items: center; justify-content: center; margin: 40rpx 0 50rpx; }
+.ctrl-side { padding: 16rpx 28rpx; color: #374151; font-size: 28rpx; }
+.ctrl-main {
+  width: 160rpx; height: 160rpx; line-height: 160rpx; text-align: center;
+  border-radius: 50%; background: #185fa5; color: #ffffff; font-size: 32rpx;
+  margin: 0 40rpx;
+}
+.timer .section-title { margin-top: 0; }
+.timer-row { display: flex; flex-wrap: wrap; gap: 14rpx; }
+.chip {
+  padding: 12rpx 24rpx; border-radius: 999rpx;
+  background: #eef2f7; color: #374151; font-size: 24rpx;
+}
+.chip.active { background: #185fa5; color: #ffffff; }
+.custom-row { display: flex; align-items: center; gap: 16rpx; margin-top: 24rpx; }
+.minutes-input {
+  flex: 1; padding: 12rpx 20rpx; border: 1rpx solid #d1d5db;
+  border-radius: 10rpx; background: #ffffff; font-size: 26rpx;
+}
+.sleep-status { margin-top: 24rpx; color: #0f6e56; font-size: 26rpx; }
+.timer-note { margin-top: 12rpx; }
+.warn { margin-top: 12rpx; color: #a32d2d; font-size: 24rpx; }
+.link { text-align: center; color: #185fa5; }
+.ellipsis { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }

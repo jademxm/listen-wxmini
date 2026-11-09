@@ -1,0 +1,62 @@
+const catalog = require('../../services/catalog');
+const player = require('../../services/player');
+const { formatTime } = require('../../utils/util');
+
+Page({
+  data: {
+    albumId: 0,
+    title: '',
+    tracks: [],
+    loading: true,
+    error: '',
+    currentId: 0,
+  },
+
+  onLoad(options) {
+    const albumId = Number(options.albumId || 0);
+    const title = decodeURIComponent(options.title || '');
+    wx.setNavigationBarTitle({ title: title || '专辑' });
+    this.setData({ albumId: albumId, title: title });
+
+    this.unsubscribe = player.subscribe(() => {
+      const track = player.currentTrack();
+      this.setData({ currentId: track ? track.id : 0 });
+    });
+  },
+
+  onShow() {
+    this.load(false);
+  },
+
+  onUnload() {
+    if (this.unsubscribe) this.unsubscribe();
+  },
+
+  onRetry() {
+    this.load(true);
+  },
+
+  onPullDownRefresh() {
+    this.load(true).then(() => wx.stopPullDownRefresh(), () => wx.stopPullDownRefresh());
+  },
+
+  load(force) {
+    this.setData({ loading: true, error: '' });
+    return catalog.getTracks(this.data.albumId, force)
+      .then((list) => {
+        const tracks = list.map((item) => Object.assign({}, item, {
+          durationText: item.duration_sec ? formatTime(item.duration_sec) : '--:--',
+        }));
+        this.setData({ tracks: tracks, loading: false });
+      })
+      .catch((err) => this.setData({ loading: false, error: err.message || '加载失败' }));
+  },
+
+  playTap(event) {
+    const index = Number(event.currentTarget.dataset.index);
+    if (!this.data.tracks.length) return;
+    player.setPlaylist(this.data.tracks, this.data.albumId, this.data.title);
+    player.play(index, 0);
+    wx.navigateTo({ url: '/pages/player/player' });
+  },
+});

@@ -1,0 +1,50 @@
+<view class="container">
+  <view class="page-head">
+    <view class="brand">
+      <view class="brand-mark">
+        <view class="bm-moon"></view>
+        <view class="bm-scroll">
+          <view class="bm-roll left"></view>
+          <view class="bm-roll right"></view>
+          <view class="bm-line a"></view>
+          <view class="bm-line b"></view>
+        </view>
+        <view class="bm-pillow"></view>
+      </view>
+      <view class="brand-text">
+        <view class="page-title">枕书</view>
+        <view class="brand-sub">一枕 · 一卷 · 一弯月</view>
+      </view>
+    </view>
+    <view class="muted">下拉可刷新内容</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="empty">加载中…</view>
+
+  <view wx:elif="{{error}}" class="card">
+    <view class="muted">{{error}}</view>
+    <view class="btn" style="margin-top:20rpx" bindtap="onRetry">重试</view>
+  </view>
+
+  <block wx:else>
+    <view wx:if="{{!albums.length}}" class="empty">枕书还是空的，请先在后台上传音频</view>
+    <view
+      wx:for="{{albums}}"
+      wx:key="id"
+      class="card album"
+      data-id="{{item.id}}"
+      data-title="{{item.title}}"
+      bindtap="openAlbum"
+    >
+      <image wx:if="{{item.cover_url}}" class="album-cover" src="{{item.cover_url}}" mode="aspectFill" />
+      <view wx:else class="album-cover album-cover-empty"></view>
+      <view class="album-info">
+        <view class="title ellipsis">{{item.title}}</view>
+        <view class="muted ellipsis">{{item.description || '共 ' + item.track_count + ' 集'}}</view>
+      </view>
+      <view class="arrow">›</view>
+    </view>
+  </block>
+</view>
+
+<mini-player />

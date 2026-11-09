@@ -1,0 +1,10 @@
+<view class="mini" wx:if="{{hasTrack}}" bindtap="openPlayer">
+  <image wx:if="{{cover}}" class="cover" src="{{cover}}" mode="aspectFill" />
+  <view wx:else class="cover cover-empty"></view>
+  <view class="info">
+    <view class="name ellipsis">{{title}}</view>
+    <view class="album ellipsis">{{albumTitle}}</view>
+  </view>
+  <view class="ctrl" catchtap="onToggle">{{isPlaying ? '暂停' : '播放'}}</view>
+  <view class="ctrl ctrl-next" catchtap="onNext">下一首</view>
+</view>
