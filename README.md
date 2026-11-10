@@ -20,6 +20,9 @@ AppID：`wxd1742cec14ff6355`｜接口域名：`https://api.mixyj.cn`｜音频域
 ## 2. 目录
 
 ```
+config/brand.js          ★ 品牌唯一来源：站名 / 副标题 / 锁屏来源 / 页面标题 / tabBar / 主色 / Logo / 徽章文案 / 空态文案
+config/brand.wxss        由 sync-brand 生成的 CSS 变量（勿手改），app.wxss 已 @import
+scripts/sync-brand.js    品牌同步脚本：把 brand.js 写进 app.json / 各页 json / project.config.json / brand.wxss
 services/config.js       接口地址、定时档位、缓存键、setShutdown 单位配置
 services/api.js          request 封装：统一响应、Bearer token、401 自动重新登录
 services/auth.js         wx.login → code2session → token，并发去重
@@ -29,23 +32,46 @@ services/player.js       ★ 后台音频单例、唯一播放状态源、切歌
 services/sleep-timer.js  定时关闭：原生 setShutdown + JS 前台兜底
 services/play-events.js  v0.12 收听事件本地队列 + 批量幂等上报（旁路，v0.12.1 保留）
 services/stats.js        v0.12 GET /me/stats 聚合数据
-utils/badges.js          v0.12.2 8 枚徽章亮/暗规则 + 语义图标/色系/进度（纯客户端常量）
+utils/badges.js          v0.12.2 8 枚徽章亮/暗判定规则；文案读 config/brand.js
 utils/heatmap.js         v0.12 热力格纯函数（v0.12.1 起页面不再引用，待清理）
-pages/index              v0.12.3 枕书（tabBar）：一弯月 + 一卷书 + 一枕的纯 CSS 品牌徽标
+pages/index              首页（tabBar）：纯 CSS 品牌徽标 + 专辑列表
 pages/album              专辑内音频列表
 pages/player             播放页 + 定时关闭
 pages/history            最近播放 + 续播（tabBar）
-pages/mine               v0.12.3「我的」：成绩单 / 成就徽章（亮暗达成状态 + 8 枚图标）/ 专辑完成度 / 工具（tabBar，不含「最近播放」内容）
+pages/mine               「我的」：成绩单 / 成就徽章（亮暗达成状态 + 8 枚图标）/ 专辑完成度 / 工具（tabBar）
 components/mini-player   全局悬浮播放条
 tests/player-sync.test.js 播放器 / 微信音频条联动回归测试（纯 Node，无依赖）
-tests/mine-module.test.js v0.12.2「我的」模块回归测试（纯 Node，无依赖，15 条）
+tests/mine-module.test.js 「我的」模块 + 品牌配置同步回归测试（纯 Node，无依赖，18 条）
 ```
 
 ## 3. 关键实现
 
+### 换品牌 / 换项目：只改 `config/brand.js`（v0.13）
+
+站名、副标题、锁屏来源名、各页导航栏标题、tabBar 三项文案与配色、主色、Logo 形态、8 枚徽章的名称/条件/差距文案、全部空态文案，统一收在 `config/brand.js`。改完执行一次同步脚本，再重新编译：
+
+```bash
+node miniprogram/scripts/sync-brand.js
+```
+
+脚本只覆盖品牌相关字段（其余配置原样保留），产出四类东西：
+
+| 生成目标 | 内容 |
+| --- | --- |
+| `app.json` | 全局标题（站名）、窗口底色、tabBar 文案 / 选中色 / 底色 |
+| `pages/*/*.json` | 各页 `navigationBarTitleText`（首页固定用站名） |
+| `project.config.json` | `description` |
+| `config/brand.wxss` | 主色等 CSS 变量（`app.wxss` 已 `@import`，各页与 mini-player 用 `var(--brand-primary)`） |
+
+- **为什么需要脚本**：app.json / 页面 json / WXSS 都不能 `require` JS，tabBar 文案、导航标题、主题色只能落成字面量，脚本负责从品牌配置生成它们。
+- **漏跑会立刻暴露**：`tests/mine-module.test.js` 的「品牌配置与静态文件同步」用例会重跑生成器做对比，不同步直接失败；另有「业务代码不得硬编码品牌名」的静态扫描。
+- **Logo 两种形态**：`logo.type='mark'`（默认）用 `index.wxss` 的纯 CSS 徽标；`type='image'` 时改读 `logo.image`（建议 PNG，放 `assets/` 填相对路径）。
+- **派生值不用手写**：`tabs[0]` 用 `{name}` 占位、`colors.tabTextActive` 自动跟随 `primary`、徽章墙副标题由「亮 / 暗」两条文案拼出。
+- **换项目的边界**：AppID、工程目录名、页面路径、tabBar 项顺序属于工程结构，仍在 `project.config.json` / `app.json` 里改；微信公众平台的名称需在后台另改（涉及主体审核）。
+
 ### 品牌「枕书」与「我的」页边界（v0.12.3）
 
-- 首页 tab 与全站可见文案统一为**枕书**（原「书库」）；`app.json` 全局标题、各页空态引导、清缓存提示、锁屏面板 `BGM.singer` 同步。AppID、工程目录名 `listen-book`、页面路径与 tabBar 三项顺序均不变；微信公众平台上的小程序名称需另行在后台修改（涉及主体审核，本次不动）。
+- 首页 tab 与全站可见文案统一为**枕书**（原「书库」）；`app.json` 全局标题、各页空态引导、清缓存提示、锁屏面板 `BGM.singer` 同步。v0.13 起这些文案全部取自 `config/brand.js`，业务代码里不再出现字面量。AppID、工程目录名 `listen-book`、页面路径与 tabBar 三项顺序均不变；微信公众平台上的小程序名称需另行在后台修改（涉及主体审核，本次不动）。
 - 首页徽标由 `pages/index/index.wxml` + `.wxss` 的 8 个 `view` 纯 CSS 绘制（一弯月 / 一卷书 / 一枕），不引入 PNG / SVG / 字体；与徽章墙的 WXSS 几何图标同一套取舍。
 - **「我的」页不再展示「最近播放」模块的内容**：`GET /me/stats` 仍返回 `last`，但前端不再消费，也不再有「继续收听」卡片与 `onContinue()`；续播完整保留在「最近」tab。`onShow()` 的 `player.reconcile()` 仍执行，保证 mini-player 与微信音频条一致。服务端零改动。
 
@@ -132,11 +158,11 @@ b.setShutdown('timer', 1);
 
 ```bash
 node miniprogram/tests/player-sync.test.js   # 11/11
-node miniprogram/tests/mine-module.test.js   # 16/16
+node miniprogram/tests/mine-module.test.js   # 18/18
 ```
 
 - `player-sync.test.js` 覆盖：原生暂停/播放后状态对齐、后台进度补报、同曲目续播不回跳、异曲目按历史进度起播、面板切歌、冷启动恢复、起播窗口、stop 后进度不被清零、定时关闭不回归。
-- `mine-module.test.js` 覆盖：起播/节流/seek/回前台事件打点、队列与失败补报、单批 50 条与队列上限、页面正常/错误/空三态、**静态断言真实收听区块已从 WXML 移除且页面不再引用 heatmap**、8 枚徽章亮/暗达成状态与语义化图标规则、**静态断言无主题切换残留**、点击 toast、热力格纯函数保留、清空历史联动、清缓存保留项、**静态断言「我的」页不含继续收听卡片与续播逻辑**、**品牌改名「枕书」全站旧称清零**。
+- `mine-module.test.js` 覆盖：起播/节流/seek/回前台事件打点、队列与失败补报、单批 50 条与队列上限、页面正常/错误/空三态、**静态断言真实收听区块已从 WXML 移除且页面不再引用 heatmap**、8 枚徽章亮/暗达成状态与语义化图标规则、**静态断言无主题切换残留**、点击 toast、热力格纯函数保留、清空历史联动、清缓存保留项、**静态断言「我的」页不含继续收听卡片与续播逻辑**、**品牌改名「枕书」全站旧称清零**、**品牌配置与 app.json / 页面 json / brand.wxss / project.config.json 同步且业务代码不硬编码品牌名**、**徽章文案全部来自 `config/brand.js`（含占位符已替换）**。
 
 真机行为仍按第 4 节清单验收。
 

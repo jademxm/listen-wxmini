@@ -1,0 +1,12 @@
+/* 由 miniprogram/scripts/sync-brand.js 从 config/brand.js 生成，请勿手改。 */
+/* 改主色 / 界面底色只改 config/brand.js，再跑一次同步脚本。 */
+page {
+  --brand-primary: #185fa5;
+  --brand-on-primary: #ffffff;
+  --brand-primary-soft: #eef2f7;
+  --brand-page-bg: #f7f8fa;
+  --brand-nav-bg: #ffffff;
+  --brand-tab-bg: #ffffff;
+  --brand-tab-text: #6b7280;
+  --brand-tab-text-active: #185fa5;
+}

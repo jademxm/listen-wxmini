@@ -1,4 +1,5 @@
 const { MAX_SKIP_ON_ERROR, HISTORY_REPORT_INTERVAL_MS, STORAGE_KEYS } = require('./config');
+const { brand } = require('../config/brand');
 const history = require('./history');
 const sleepTimer = require('./sleep-timer');
 const events = require('./play-events');
@@ -242,7 +243,7 @@ function play(index, startAt) {
   // 元数据每次写全：只写有封面的曲目会让微信播放条/锁屏残留上一首的图
   BGM.title = track.title || '未知音频';
   BGM.epname = state.albumTitle || '';
-  BGM.singer = '枕书';
+  BGM.singer = brand.singer;
   BGM.coverImgUrl = track.cover_url || '';
   BGM.startTime = resumeAt; // 仅在赋新 src 时生效
 

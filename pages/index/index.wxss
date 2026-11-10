@@ -2,7 +2,8 @@
 .page-head > .muted { flex: none; margin-left: 16rpx; }
 .page-title { font-size: 40rpx; font-weight: 500; }
 
-/* 「枕书」品牌徽标：一弯月 + 一卷书 + 一枕，纯 CSS，无图片资源 */
+/* 品牌徽标：一弯月 + 一卷书 + 一枕，纯 CSS，无图片资源。
+   文案 / 是否改用图片见 config/brand.js 的 logo 与 name。 */
 .brand { display: flex; align-items: center; min-width: 0; }
 .brand-text { min-width: 0; }
 .brand-sub { margin-top: 2rpx; font-size: 20rpx; color: #8a93a2; letter-spacing: 1rpx; }
@@ -12,6 +13,8 @@
   background: linear-gradient(155deg, #2a4778, #16294b);
   box-shadow: 0 6rpx 16rpx rgba(22, 41, 75, 0.22);
 }
+/* logo.type='image' 时复用同一尺寸与圆角，只换背景 */
+.brand-mark-image { background: transparent; box-shadow: none; }
 .bm-moon {
   position: absolute; top: 8rpx; right: 8rpx; width: 20rpx; height: 20rpx;
   border: 3rpx solid #ffd98a; border-radius: 50%;

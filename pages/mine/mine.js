@@ -4,6 +4,7 @@ const player = require('../../services/player');
 const { STORAGE_KEYS } = require('../../services/config');
 const { formatDurationText } = require('../../utils/util');
 const { EMPTY_STATS, buildBadges } = require('../../utils/badges');
+const { brand, fill } = require('../../config/brand');
 
 const EMPTY_VIEW = {
   scores: { finishedTracks: '—', finishedContent: '—', listenedAlbums: '—' },
@@ -19,6 +20,10 @@ function emptyView() {
 
 Page({
   data: Object.assign({
+    titles: brand.titles,
+    copy: brand.copy,
+    badgeText: brand.badges.ui,
+    badgeCountText: fill(brand.badges.ui.countFormat, { lit: 0, total: 8 }),
     loading: true,
     error: '',
     loaded: false,
@@ -53,7 +58,8 @@ Page({
         this.setData(Object.assign({
           loading: false,
           loaded: false,
-          error: (err && err.message) || '加载失败',
+          error: (err && err.message) || brand.copy.loadFailed,
+          badgeCountText: fill(brand.badges.ui.countFormat, { lit: 0, total: EMPTY_VIEW.badges.length }),
         }, emptyView()));
       });
   },
@@ -75,6 +81,7 @@ Page({
     });
 
     const badges = buildBadges(s);
+    const litCount = badges.filter((badge) => badge.lit).length;
     return {
       scores: {
         finishedTracks: s.finished_tracks,
@@ -82,8 +89,9 @@ Page({
         listenedAlbums: s.listened_albums,
       },
       badges: badges,
-      litCount: badges.filter((badge) => badge.lit).length,
+      litCount: litCount,
       badgeTotal: badges.length,
+      badgeCountText: fill(brand.badges.ui.countFormat, { lit: litCount, total: badges.length }),
       albums: albums,
     };
   },
@@ -127,7 +135,7 @@ Page({
   onClearCache() {
     wx.showModal({
       title: '清空本地缓存',
-      content: '只清理本地缓存（枕书列表等），不会删除服务端的播放记录与收听统计。',
+      content: brand.copy.clearCacheConfirm,
       success: (res) => {
         if (!res.confirm) return;
         try {

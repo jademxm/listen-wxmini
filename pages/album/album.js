@@ -1,9 +1,12 @@
 const catalog = require('../../services/catalog');
 const player = require('../../services/player');
 const { formatTime } = require('../../utils/util');
+const { brand } = require('../../config/brand');
 
 Page({
   data: {
+    brand: brand,
+    copy: brand.copy,
     albumId: 0,
     title: '',
     tracks: [],
@@ -15,7 +18,7 @@ Page({
   onLoad(options) {
     const albumId = Number(options.albumId || 0);
     const title = decodeURIComponent(options.title || '');
-    wx.setNavigationBarTitle({ title: title || '专辑' });
+    wx.setNavigationBarTitle({ title: title || brand.titles.album });
     this.setData({ albumId: albumId, title: title });
 
     this.unsubscribe = player.subscribe(() => {
@@ -49,7 +52,7 @@ Page({
         }));
         this.setData({ tracks: tracks, loading: false });
       })
-      .catch((err) => this.setData({ loading: false, error: err.message || '加载失败' }));
+      .catch((err) => this.setData({ loading: false, error: err.message || brand.copy.loadFailed }));
   },
 
   playTap(event) {

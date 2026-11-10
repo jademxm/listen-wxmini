@@ -1,7 +1,10 @@
 const catalog = require('../../services/catalog');
+const { brand } = require('../../config/brand');
 
 Page({
   data: {
+    brand: brand,
+    copy: brand.copy,
     albums: [],
     loading: true,
     error: '',
@@ -23,7 +26,7 @@ Page({
     this.setData({ loading: true, error: '' });
     return catalog.getAlbums(force)
       .then((list) => this.setData({ albums: list, loading: false }))
-      .catch((err) => this.setData({ loading: false, error: err.message || '加载失败' }));
+      .catch((err) => this.setData({ loading: false, error: err.message || brand.copy.loadFailed }));
   },
 
   openAlbum(event) {

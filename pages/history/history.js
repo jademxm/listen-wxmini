@@ -2,9 +2,12 @@ const historyApi = require('../../services/history');
 const catalog = require('../../services/catalog');
 const player = require('../../services/player');
 const { formatTime, formatDate } = require('../../utils/util');
+const { brand } = require('../../config/brand');
 
 Page({
   data: {
+    titles: brand.titles,
+    copy: brand.copy,
     list: [],
     loading: true,
     error: '',
@@ -64,7 +67,7 @@ Page({
           loading: false,
         });
       })
-      .catch((err) => this.setData({ loading: false, error: err.message || '加载失败' }));
+      .catch((err) => this.setData({ loading: false, error: err.message || brand.copy.loadFailed }));
   },
 
   continuePlay(event) {

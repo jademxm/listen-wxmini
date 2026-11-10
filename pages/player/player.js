@@ -1,9 +1,12 @@
 const player = require('../../services/player');
 const { formatTime } = require('../../utils/util');
 const { TIMER_PRESETS } = require('../../services/config');
+const { brand } = require('../../config/brand');
 
 Page({
   data: {
+    copy: brand.copy,
+    primary: brand.colors.primary,
     hasTrack: false,
     title: '',
     cover: '',

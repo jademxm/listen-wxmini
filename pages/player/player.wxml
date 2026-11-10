@@ -1,5 +1,5 @@
 <view class="container">
-  <view wx:if="{{!hasTrack}}" class="empty">还没有播放内容，去枕书选一集吧</view>
+  <view wx:if="{{!hasTrack}}" class="empty">{{copy.playerEmpty}}</view>
 
   <block wx:else>
     <view class="cover-wrap">
@@ -16,7 +16,7 @@
       <slider
         min="0" max="100" step="1"
         value="{{sliderValue}}"
-        activeColor="#185fa5"
+        activeColor="{{primary}}"
         backgroundColor="#e5e7eb"
         block-size="14"
         bindchanging="onSliderChanging"

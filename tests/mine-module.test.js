@@ -206,6 +206,18 @@ async function settle() {
   for (let i = 0; i < 10; i += 1) await new Promise((resolve) => setTimeout(resolve, 0));
 }
 
+/** 递归收集小程序源码文件，用于「不得硬编码」类静态断言 */
+function listFiles(rel, exts, out) {
+  const dir = path.join(ROOT, rel);
+  fs.readdirSync(dir).forEach((name) => {
+    const relPath = path.join(rel, name);
+    const full = path.join(ROOT, relPath);
+    if (fs.statSync(full).isDirectory()) listFiles(relPath, exts, out);
+    else if (exts.test(name)) out.push(relPath);
+  });
+  return out;
+}
+
 const results = [];
 async function test(name, fn) {
   try {
@@ -565,19 +577,22 @@ async function main() {
   });
 
   await test('品牌改名「枕书」：tabBar / 标题 / 文案 / 锁屏来源统一，旧称清零', async () => {
+    const { brand } = require('../config/brand');
     const appJson = JSON.parse(fs.readFileSync(APP_JSON, 'utf8'));
-    assert.equal(appJson.tabBar.list[0].text, '枕书');
+    assert.equal(appJson.tabBar.list[0].text, brand.name);
     assert.equal(appJson.tabBar.list[1].text, '最近', 'tabBar 顺序与其它项不变');
     assert.equal(appJson.tabBar.list[2].text, '我的');
-    assert.equal(appJson.window.navigationBarTitleText, '枕书');
+    assert.equal(appJson.window.navigationBarTitleText, brand.name);
     assert.equal(appJson.lazyCodeLoading, 'requiredComponents', '组件按需注入配置不得被改动');
     assert.deepEqual(appJson.requiredBackgroundModes, ['audio']);
 
     const indexJson = JSON.parse(fs.readFileSync(INDEX_JSON, 'utf8'));
-    assert.equal(indexJson.navigationBarTitleText, '枕书');
+    assert.equal(indexJson.navigationBarTitleText, brand.name);
 
+    // 首页标题 / 副标题 / 徽标入口改成读配置，不再写死字面量
     const indexWxml = fs.readFileSync(INDEX_WXML, 'utf8');
-    assert.ok(indexWxml.indexOf('>枕书<') >= 0);
+    assert.ok(indexWxml.indexOf('{{brand.name}}') >= 0, '首页标题应来自品牌配置');
+    assert.ok(indexWxml.indexOf('{{brand.slogan}}') >= 0, '首页副标题应来自品牌配置');
     assert.ok(indexWxml.indexOf(OLD_BRAND) < 0);
     const indexWxss = fs.readFileSync(INDEX_WXSS, 'utf8');
     ['.brand-mark', '.bm-moon', '.bm-scroll', '.bm-pillow'].forEach((cls) => {
@@ -595,7 +610,72 @@ async function main() {
       const src = fs.readFileSync(path.join(ROOT, rel), 'utf8');
       assert.ok(src.indexOf(OLD_BRAND) < 0, rel + ' 仍残留旧品牌名');
     });
-    assert.ok(fs.readFileSync(path.join(ROOT, 'services', 'player.js'), 'utf8').indexOf("BGM.singer = '枕书'") >= 0);
+    assert.ok(fs.readFileSync(path.join(ROOT, 'services', 'player.js'), 'utf8').indexOf('BGM.singer = brand.singer') >= 0,
+      '锁屏来源名应来自品牌配置');
+  });
+
+  await test('品牌配置与静态文件同步：改名 / 换色只改 config/brand.js', async () => {
+    const { brand } = require('../config/brand');
+    const sync = require('../scripts/sync-brand');
+    const hint = '请运行 node miniprogram/scripts/sync-brand.js';
+
+    // 1) app.json 已按品牌配置生成：再跑一次生成器应为空操作
+    const appJson = JSON.parse(fs.readFileSync(APP_JSON, 'utf8'));
+    assert.deepEqual(sync.buildAppJson(appJson), appJson, 'app.json 与 config/brand.js 不同步，' + hint);
+    assert.equal(appJson.window.navigationBarTitleText, brand.name);
+    assert.equal(appJson.tabBar.selectedColor, brand.colors.primary, 'tabBar 选中色应跟随主色');
+    assert.equal(appJson.tabBar.list.length, brand.tabs.length, 'tabBar 项数与品牌配置不一致');
+
+    // 2) 各页导航栏标题
+    Object.keys(sync.PAGE_TITLES).forEach((page) => {
+      const json = JSON.parse(fs.readFileSync(path.join(ROOT, page + '.json'), 'utf8'));
+      assert.equal(json.navigationBarTitleText, sync.PAGE_TITLES[page], page + '.json 标题未同步，' + hint);
+    });
+
+    // 3) 主题变量文件与生成结果逐字一致
+    const wxss = fs.readFileSync(path.join(ROOT, 'config', 'brand.wxss'), 'utf8');
+    assert.equal(wxss, sync.buildWxss(), 'config/brand.wxss 与 config/brand.js 不同步，' + hint);
+    assert.ok(wxss.indexOf('--brand-primary: ' + brand.colors.primary + ';') >= 0);
+    assert.ok(fs.readFileSync(path.join(ROOT, 'app.wxss'), 'utf8').indexOf('@import "./config/brand.wxss"') >= 0,
+      'app.wxss 必须引入品牌变量文件');
+
+    // 4) project.config.json 描述
+    const project = JSON.parse(fs.readFileSync(path.join(ROOT, 'project.config.json'), 'utf8'));
+    assert.equal(project.description, sync.buildDescription());
+
+    // 5) 业务代码不得再硬编码品牌名：只允许出现在 config/brand.js 和生成出来的 json 里
+    const files = [];
+    ['pages', 'components', 'services', 'utils'].forEach((dir) => listFiles(dir, /\.(js|wxml|wxss)$/, files));
+    files.push('app.wxss');
+    const offenders = files.filter((rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8').indexOf(brand.name) >= 0);
+    assert.deepEqual(offenders, [], '品牌名不应写死在业务代码里：' + offenders.join(', '));
+  });
+
+  await test('徽章文案来自品牌配置：名称 / 条件 / 差距 / 已点亮均可改文案', async () => {
+    const { brand } = require('../config/brand');
+    const { buildBadges } = require('../utils/badges');
+    const badges = buildBadges(mockStats());
+
+    badges.forEach((badge) => {
+      const text = brand.badges.rules[badge.id];
+      assert.ok(text, '徽章 ' + badge.id + ' 缺少文案配置');
+      assert.equal(badge.name, text.name);
+      assert.equal(badge.condition, text.condition);
+      assert.ok(badge.toast.indexOf(text.condition) === 0, 'toast 应以达成条件开头');
+    });
+    assert.equal(badges.find((b) => b.id === 'first').hint, brand.badges.ui.lit, '亮态文案应来自品牌配置');
+    assert.ok(badges.find((b) => b.id === 'hours').hint.indexOf('还差') === 0);
+
+    // 差距文案里的 {n} / {time} 必须被真正替换掉，WXML 不做字符串拼接
+    badges.forEach((badge) => {
+      assert.ok(badge.hint.indexOf('{') < 0, badge.id + ' 的提示残留未替换占位符：' + badge.hint);
+    });
+
+    // 徽章名称只出现在品牌配置里，badges.js 不再硬编码文案
+    const badgesSrc = fs.readFileSync(BADGES_JS, 'utf8');
+    Object.keys(brand.badges.rules).forEach((id) => {
+      assert.ok(badgesSrc.indexOf(brand.badges.rules[id].name) < 0, 'utils/badges.js 不应再写死徽章名「' + brand.badges.rules[id].name + '」');
+    });
   });
 
   const failed = results.filter((r) => !r.ok);

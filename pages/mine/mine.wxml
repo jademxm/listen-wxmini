@@ -1,12 +1,12 @@
 <view class="container">
   <view class="page-head">
-    <view class="page-title">我的</view>
+    <view class="page-title">{{titles.mine}}</view>
     <view class="muted">听过的，都在这里</view>
   </view>
 
   <view wx:if="{{error}}" class="card error-card">
     <view class="muted">{{error}}</view>
-    <view class="btn ghost" bindtap="onRetry">重试</view>
+    <view class="btn ghost" bindtap="onRetry">{{copy.retry}}</view>
   </view>
 
   <view class="section-title">收听成绩单</view>
@@ -28,12 +28,12 @@
 
   <view class="section-head">
     <view class="section-title">成就徽章</view>
-    <text class="section-note">达成即点亮</text>
+    <text class="section-note">{{badgeText.note}}</text>
   </view>
   <view class="card badge-wall">
     <view class="badge-wall-head">
-      <text class="badge-count">{{litCount}} / {{badgeTotal}} 已点亮</text>
-      <text class="badge-wall-sub">亮 · 已达成　暗 · 未达成</text>
+      <text class="badge-count">{{badgeCountText}}</text>
+      <text class="badge-wall-sub">{{badgeText.wallSub}}</text>
     </view>
     <view class="badge-grid">
       <view wx:for="{{badges}}" wx:key="id"
@@ -53,8 +53,8 @@
       </view>
     </view>
     <view class="badge-legend tone-indigo">
-      <view class="legend-chip is-lit"></view><text class="badge-legend-text">亮 · 已达成</text>
-      <view class="legend-chip is-dim"></view><text class="badge-legend-text">暗 · 未达成</text>
+      <view class="legend-chip is-lit"></view><text class="badge-legend-text">{{badgeText.litLabel}}</text>
+      <view class="legend-chip is-dim"></view><text class="badge-legend-text">{{badgeText.dimLabel}}</text>
     </view>
   </view>
 
@@ -73,8 +73,8 @@
     </view>
   </view>
   <view wx:else class="card empty-inline">
-    <view class="muted">还没有听过的专辑</view>
-    <view class="btn ghost" bindtap="onGoCatalog">去枕书</view>
+    <view class="muted">{{copy.mineAlbumsEmpty}}</view>
+    <view class="btn ghost" bindtap="onGoCatalog">{{copy.goCatalog}}</view>
   </view>
 
   <view class="section-title">工具</view>
@@ -85,10 +85,10 @@
     <view class="tool"><text>版本</text><text class="muted">{{version}}</text></view>
   </view>
 
-  <view wx:if="{{loading}}" class="muted loading-tip">加载中…</view>
+  <view wx:if="{{loading}}" class="muted loading-tip">{{copy.loading}}</view>
   <view wx:if="{{loaded && !albums.length && !scores.finishedTracks}}" class="empty-inline center">
-    <view class="muted">还没有收听记录，去枕书听第一集吧</view>
-    <view class="btn" bindtap="onGoCatalog">去枕书</view>
+    <view class="muted">{{copy.mineListeningEmpty}}</view>
+    <view class="btn" bindtap="onGoCatalog">{{copy.goCatalog}}</view>
   </view>
 </view>
 

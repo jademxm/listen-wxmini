@@ -1,7 +1,14 @@
 <view class="container">
   <view class="page-head">
     <view class="brand">
-      <view class="brand-mark">
+      <!-- 品牌徽标：默认纯 CSS 绘制，logo.type='image' 时改走图片（见 config/brand.js） -->
+      <image
+        wx:if="{{brand.logo.type === 'image' && brand.logo.image}}"
+        class="brand-mark brand-mark-image"
+        src="{{brand.logo.image}}"
+        mode="aspectFit"
+      />
+      <view wx:else class="brand-mark">
         <view class="bm-moon"></view>
         <view class="bm-scroll">
           <view class="bm-roll left"></view>
@@ -12,22 +19,22 @@
         <view class="bm-pillow"></view>
       </view>
       <view class="brand-text">
-        <view class="page-title">枕书</view>
-        <view class="brand-sub">一枕 · 一卷 · 一弯月</view>
+        <view class="page-title">{{brand.name}}</view>
+        <view class="brand-sub">{{brand.slogan}}</view>
       </view>
     </view>
     <view class="muted">下拉可刷新内容</view>
   </view>
 
-  <view wx:if="{{loading}}" class="empty">加载中…</view>
+  <view wx:if="{{loading}}" class="empty">{{copy.loading}}</view>
 
   <view wx:elif="{{error}}" class="card">
     <view class="muted">{{error}}</view>
-    <view class="btn" style="margin-top:20rpx" bindtap="onRetry">重试</view>
+    <view class="btn" style="margin-top:20rpx" bindtap="onRetry">{{copy.retry}}</view>
   </view>
 
   <block wx:else>
-    <view wx:if="{{!albums.length}}" class="empty">枕书还是空的，请先在后台上传音频</view>
+    <view wx:if="{{!albums.length}}" class="empty">{{copy.indexEmpty}}</view>
     <view
       wx:for="{{albums}}"
       wx:key="id"

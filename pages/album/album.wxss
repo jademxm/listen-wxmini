@@ -8,6 +8,6 @@
 .track-info { flex: 1; min-width: 0; }
 .track-title { font-size: 28rpx; }
 .track-info .muted { margin-top: 6rpx; }
-.track-active .track-title { color: #185fa5; }
-.playing { color: #185fa5; font-size: 22rpx; flex: none; margin-left: 12rpx; }
+.track-active .track-title { color: var(--brand-primary); }
+.playing { color: var(--brand-primary); font-size: 22rpx; flex: none; margin-left: 12rpx; }
 .ellipsis { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }

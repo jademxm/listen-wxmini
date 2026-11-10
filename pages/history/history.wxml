@@ -1,15 +1,15 @@
 <view class="container">
   <view class="page-head">
-    <view class="page-title">最近播放</view>
+    <view class="page-title">{{titles.history}}</view>
     <view wx:if="{{list.length}}" class="muted clear" catchtap="clearAll">清空</view>
   </view>
 
-  <view wx:if="{{loading && !list.length}}" class="empty">加载中…</view>
+  <view wx:if="{{loading && !list.length}}" class="empty">{{copy.loading}}</view>
   <view wx:elif="{{error && !list.length}}" class="card">
     <view class="muted">{{error}}</view>
-    <view class="btn" style="margin-top:20rpx" bindtap="onRetry">重试</view>
+    <view class="btn" style="margin-top:20rpx" bindtap="onRetry">{{copy.retry}}</view>
   </view>
-  <view wx:elif="{{!list.length}}" class="empty">还没有播放记录，去枕书听一集吧</view>
+  <view wx:elif="{{!list.length}}" class="empty">{{copy.historyEmpty}}</view>
 
   <view wx:for="{{list}}" wx:key="trackId" class="card item">
     <view class="row" data-index="{{index}}" bindtap="continuePlay">
@@ -28,7 +28,7 @@
     </view>
   </view>
 
-  <view wx:if="{{loading && list.length}}" class="empty">加载中…</view>
+  <view wx:if="{{loading && list.length}}" class="empty">{{copy.loading}}</view>
   <view wx:if="{{!hasMore && list.length}}" class="muted" style="text-align:center;padding:20rpx">没有更多了</view>
 </view>
 

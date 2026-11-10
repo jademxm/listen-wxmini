@@ -10,7 +10,7 @@
 .ctrl-side { padding: 16rpx 28rpx; color: #374151; font-size: 28rpx; }
 .ctrl-main {
   width: 160rpx; height: 160rpx; line-height: 160rpx; text-align: center;
-  border-radius: 50%; background: #185fa5; color: #ffffff; font-size: 32rpx;
+  border-radius: 50%; background: var(--brand-primary); color: #ffffff; font-size: 32rpx;
   margin: 0 40rpx;
 }
 .timer .section-title { margin-top: 0; }
@@ -19,7 +19,7 @@
   padding: 12rpx 24rpx; border-radius: 999rpx;
   background: #eef2f7; color: #374151; font-size: 24rpx;
 }
-.chip.active { background: #185fa5; color: #ffffff; }
+.chip.active { background: var(--brand-primary); color: #ffffff; }
 .custom-row { display: flex; align-items: center; gap: 16rpx; margin-top: 24rpx; }
 .minutes-input {
   flex: 1; padding: 12rpx 20rpx; border: 1rpx solid #d1d5db;
@@ -28,5 +28,5 @@
 .sleep-status { margin-top: 24rpx; color: #0f6e56; font-size: 26rpx; }
 .timer-note { margin-top: 12rpx; }
 .warn { margin-top: 12rpx; color: #a32d2d; font-size: 24rpx; }
-.link { text-align: center; color: #185fa5; }
+.link { text-align: center; color: var(--brand-primary); }
 .ellipsis { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }

@@ -4,12 +4,12 @@
     <view class="muted">共 {{tracks.length}} 集 · 点击开始播放</view>
   </view>
 
-  <view wx:if="{{loading}}" class="empty">加载中…</view>
+  <view wx:if="{{loading}}" class="empty">{{copy.loading}}</view>
   <view wx:elif="{{error}}" class="card">
     <view class="muted">{{error}}</view>
-    <view class="btn" style="margin-top:20rpx" bindtap="onRetry">重试</view>
+    <view class="btn" style="margin-top:20rpx" bindtap="onRetry">{{copy.retry}}</view>
   </view>
-  <view wx:elif="{{!tracks.length}}" class="empty">这个专辑还没有音频</view>
+  <view wx:elif="{{!tracks.length}}" class="empty">{{copy.albumEmpty}}</view>
 
   <view wx:else class="card list">
     <view

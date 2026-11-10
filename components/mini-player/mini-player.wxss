@@ -22,9 +22,9 @@
   margin-left: 12rpx;
   padding: 8rpx 18rpx;
   border-radius: 999rpx;
-  background: #185fa5;
+  background: var(--brand-primary);
   color: #ffffff;
   font-size: 24rpx;
 }
-.ctrl-next { background: #eef2f7; color: #185fa5; }
+.ctrl-next { background: var(--brand-primary-soft); color: var(--brand-primary); }
 .ellipsis { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
