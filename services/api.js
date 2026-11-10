@@ -56,11 +56,16 @@ function del(path) {
   return request(path, { method: 'DELETE' });
 }
 
-function collect(path, page, acc) {
+/**
+ * 翻页拉全量。onMeta 可选，每页都会回调一次原始响应，
+ * 供调用方取响应自带的 catalog_version（缓存要存"这一份数据对应的版本"）。
+ */
+function collect(path, page, acc, onMeta) {
   return get(path, { page: page, per_page: PAGE_SIZE }).then((data) => {
     const list = (data && data.list) || [];
+    if (onMeta && data) onMeta(data);
     const all = acc.concat(list);
-    if (data && data.has_more && list.length) return collect(path, page + 1, all);
+    if (data && data.has_more && list.length) return collect(path, page + 1, all, onMeta);
     return all;
   });
 }

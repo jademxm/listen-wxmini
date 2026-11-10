@@ -47,7 +47,7 @@ Page({
             : (item.progress_sec || 0);
           return {
             trackId: track.id,
-            title: track.title || '音频已下架',
+            title: track.title || brand.copy.itemOffline,
             cover: track.cover_url || '',
             albumTitle: item.album_title || '最近播放',
             progressSec: progressSec,
@@ -107,7 +107,7 @@ Page({
       })
       .catch(() => {
         wx.hideLoading();
-        wx.showToast({ title: '加载专辑失败', icon: 'none' });
+        wx.showToast({ title: brand.copy.groupLoadFailed, icon: 'none' });
       });
   },
 

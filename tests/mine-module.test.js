@@ -30,6 +30,8 @@ let pageConfigs;
 let statsResponse;
 let statsFail;
 let failEventsOnce;
+let bootstrapContent;
+let catalogVersion;
 
 const ROOT = path.join(__dirname, '..');
 // 旧品牌名用拼接构造，避免断言源码本身命中「全站清零」扫描
@@ -122,6 +124,8 @@ function reset() {
   statsResponse = mockStats();
   statsFail = false;
   failEventsOnce = false;
+  bootstrapContent = null;
+  catalogVersion = 1;
 
   global.wx = {
     getBackgroundAudioManager: () => bgm,
@@ -156,8 +160,17 @@ function reset() {
             return;
           }
           data = statsResponse;
-        } else if (url.indexOf('/catalog/version') >= 0) data = { catalog_version: 1 };
-        else if (url.indexOf('/albums/') >= 0 && url.indexOf('/tracks') >= 0) data = { list: TRACKS, has_more: false };
+        } else if (url.indexOf('/catalog/version') >= 0) data = { catalog_version: catalogVersion };
+        else if (url.indexOf('/bootstrap') >= 0) {
+          data = {
+            catalog_version: catalogVersion,
+            content: bootstrapContent || {
+              level_names: { group: '专辑', item: '音频' },
+              max_depth: 2,
+            },
+          };
+        }
+        else if (url.indexOf('/albums/') >= 0 && url.indexOf('/tracks') >= 0) data = { list: TRACKS, has_more: false, catalog_version: catalogVersion };
         else if (url.indexOf('/me/histories') >= 0 && opts.method === 'DELETE') data = { deleted: 1 };
         else if (url.indexOf('/auth/login') >= 0) data = { token: 'mock-token' };
 
@@ -651,6 +664,56 @@ async function main() {
     assert.deepEqual(offenders, [], '品牌名不应写死在业务代码里：' + offenders.join(', '));
   });
 
+  await test('内容层名可配：bootstrap 下发后全站文案跟着变，接口契约不变', async () => {
+    const { brand, applyContent } = require('../config/brand');
+    const origin = {
+      group: brand.content.group,
+      item: brand.content.item,
+      maxDepth: brand.content.maxDepth,
+    };
+
+    // 1) 空值 / 无字段不应破坏当前文案
+    assert.equal(applyContent(null), false);
+    assert.equal(applyContent({ level_names: {} }), false);
+    assert.equal(brand.content.group, origin.group);
+
+    // 2) 服务端下发「课程 / 章节」→ 标题 / 空态 / 徽章条件全部跟着换
+    assert.equal(applyContent({ level_names: { group: '课程', item: '章节' }, max_depth: 3 }), true);
+    assert.equal(brand.content.group, '课程');
+    assert.equal(brand.content.maxDepth, 3);
+    assert.equal(brand.titles.album, '课程', '层名改了导航标题要跟着换');
+    assert.equal(brand.copy.albumEmpty, '这个课程还没有章节');
+    assert.equal(brand.copy.indexEmpty, brand.name + '还是空的，请先在后台上传章节');
+    assert.equal(brand.copy.mineAlbumsLabel, '听过课程（张）');
+    assert.equal(brand.copy.mineAlbumsSection, '课程完成度');
+    assert.equal(brand.copy.openGroupTracks, '查看本课程全部章节 ›');
+    assert.equal(brand.copy.itemOffline, '章节已下架');
+    assert.equal(brand.badges.rules.three.condition, '听过 3 张课程');
+    assert.equal(brand.badges.rules.explorer.gap, '还差 {n} 张课程', '{n} 要留给 fill() 渲染时替换，不能被提前吃掉');
+    assert.equal(brand.badges.ui.litLabel, '亮 · 已达成', '徽章 UI 固定文案不受层名影响');
+
+    // 3) 还原，避免影响后续用例
+    assert.equal(applyContent({ level_names: { group: origin.group, item: origin.item }, max_depth: origin.maxDepth }), true);
+    assert.equal(brand.content.group, origin.group);
+    assert.equal(brand.titles.album, origin.group);
+    assert.equal(brand.copy.albumEmpty, '这个' + origin.group + '还没有' + origin.item);
+    assert.equal(brand.badges.rules.three.condition, '听过 3 张' + origin.group);
+  });
+
+  await test('层名不写死在页面模板：WXML 只引用 copy.*，换层名不必改页面', async () => {
+    const pages = [
+      'pages/index/index.wxml', 'pages/album/album.wxml', 'pages/player/player.wxml',
+      'pages/history/history.wxml', 'pages/mine/mine.wxml',
+    ];
+    // 默认层名是从 config/brand.js 的 content 段来的，模板里不该再出现字面量
+    const words = ['专辑', '音频'];
+    const offenders = pages.filter((rel) => {
+      const src = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+      return words.some((word) => src.indexOf(word) >= 0);
+    });
+    assert.deepEqual(offenders, [], '页面模板出现了层名字面量，应改为引用 copy.*：' + offenders.join(', '));
+  });
+
   await test('徽章文案来自品牌配置：名称 / 条件 / 差距 / 已点亮均可改文案', async () => {
     const { brand } = require('../config/brand');
     const { buildBadges } = require('../utils/badges');
@@ -676,6 +739,70 @@ async function main() {
     Object.keys(brand.badges.rules).forEach((id) => {
       assert.ok(badgesSrc.indexOf(brand.badges.rules[id].name) < 0, 'utils/badges.js 不应再写死徽章名「' + brand.badges.rules[id].name + '」');
     });
+  });
+
+  await test('bootstrap 层名落缓存：冷启动直接用上次的服务端配置', async () => {
+    const { brand } = require('../config/brand');
+    const catalog = require('../services/catalog');
+
+    bootstrapContent = { level_names: { group: '课程', item: '章节' }, max_depth: 3 };
+    assert.equal(await catalog.syncContent(), true, '层名变化应返回 true，便于刷新已渲染页面');
+    assert.equal(brand.content.group, '课程');
+    assert.equal(brand.copy.albumEmpty, '这个课程还没有章节');
+
+    const cached = storage.get('lb_content');
+    assert.ok(cached && cached.level_names, '下发结果要落到 lb_content，供冷启动读取');
+    assert.equal(cached.level_names.group, '课程');
+
+    // 值没变时不重复刷新页面
+    assert.equal(await catalog.syncContent(), false);
+
+    // 模拟冷启动：清模块缓存后重新 require，文案直接取缓存里的层名
+    const root = path.join(__dirname, '..');
+    Object.keys(require.cache).forEach((key) => {
+      if (key.indexOf(root) === 0) delete require.cache[key];
+    });
+    const fresh = require('../config/brand').brand;
+    assert.equal(fresh.content.group, '课程', '冷启动应优先用缓存的层名，而不是回落到默认值');
+    assert.equal(fresh.content.maxDepth, 3);
+    assert.equal(fresh.copy.albumEmpty, '这个课程还没有章节');
+
+    // 收尾：清掉缓存并把模块重置回默认品牌配置，不影响其它用例
+    storage.delete('lb_content');
+    bootstrapContent = null;
+    Object.keys(require.cache).forEach((key) => {
+      if (key.indexOf(root) === 0) delete require.cache[key];
+    });
+    assert.equal(require('../config/brand').brand.content.group, '专辑');
+  });
+
+  await test('目录缓存：版本相同才命中，版本前进/回退都必须重新拉取', async () => {
+    reset();
+    const catalog = require('../services/catalog');
+    const trackRequests = () => requests.filter((r) => r.url.indexOf('/albums/7/tracks') >= 0);
+
+    // 1) 版本一致 → 命中缓存，不发列表请求
+    catalogVersion = 1;
+    wx.setStorageSync('lb_tracks_7', { version: 1, list: [{ id: 99, title: '旧列表' }] });
+    let list = await catalog.getTracks(7);
+    assert.equal(list[0].id, 99);
+    assert.equal(trackRequests().length, 0, '版本未变时不应重复拉列表');
+
+    // 2) 服务端版本前进（后台拖拽 / 上下架）→ 必须重新拉，且落缓存用列表响应自带的版本
+    catalogVersion = 2;
+    list = await catalog.getTracks(7);
+    assert.equal(list[0].id, 1);
+    let cached = storage.get('lb_tracks_7');
+    assert.equal(cached.version, 2, '缓存版本必须与内容同源');
+    assert.equal(cached.list.length, TRACKS.length);
+
+    // 3) 缓存版本比服务端大（服务端曾被 cache:clear 清回小值）→ 仍要刷新，
+    //    这正是「后台改了顺序、小程序死活不更新」的成因，strict equal 才能兜住
+    wx.setStorageSync('lb_tracks_7', { version: 999, list: [{ id: 99, title: '旧列表' }] });
+    list = await catalog.getTracks(7);
+    assert.equal(list[0].id, 1);
+    cached = storage.get('lb_tracks_7');
+    assert.equal(cached.version, 2);
   });
 
   const failed = results.filter((r) => !r.ok);

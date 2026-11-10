@@ -229,7 +229,7 @@ function play(index, startAt) {
   const i = ((index % total) + total) % total;
   const track = state.playlist[i];
   if (!track || !track.url) {
-    wx.showToast({ title: '音频地址无效', icon: 'none' });
+    wx.showToast({ title: brand.copy.itemUrlInvalid, icon: 'none' });
     return;
   }
 
@@ -241,7 +241,7 @@ function play(index, startAt) {
   persist();
 
   // 元数据每次写全：只写有封面的曲目会让微信播放条/锁屏残留上一首的图
-  BGM.title = track.title || '未知音频';
+  BGM.title = track.title || brand.copy.untitledItem;
   BGM.epname = state.albumTitle || '';
   BGM.singer = brand.singer;
   BGM.coverImgUrl = track.cover_url || '';

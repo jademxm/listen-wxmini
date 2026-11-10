@@ -17,5 +17,7 @@ module.exports = {
     sleep: 'lb_sleep',
     player: 'lb_player',
     playEvents: 'lb_play_events',
+    // 服务端下发的内容层名（config/brand.js 的 applyContent 读写，冷启动优先用）
+    content: 'lb_content',
   },
 };

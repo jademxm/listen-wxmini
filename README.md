@@ -20,13 +20,13 @@ AppID：`wxd1742cec14ff6355`｜接口域名：`https://api.mixyj.cn`｜音频域
 ## 2. 目录
 
 ```
-config/brand.js          ★ 品牌唯一来源：站名 / 副标题 / 锁屏来源 / 页面标题 / tabBar / 主色 / Logo / 徽章文案 / 空态文案
+config/brand.js          ★ 品牌唯一来源：站名 / 副标题 / 锁屏来源 / 页面标题 / tabBar / 主色 / Logo / 徽章文案 / 空态文案 / 内容层名默认值
 config/brand.wxss        由 sync-brand 生成的 CSS 变量（勿手改），app.wxss 已 @import
 scripts/sync-brand.js    品牌同步脚本：把 brand.js 写进 app.json / 各页 json / project.config.json / brand.wxss
 services/config.js       接口地址、定时档位、缓存键、setShutdown 单位配置
 services/api.js          request 封装：统一响应、Bearer token、401 自动重新登录
 services/auth.js         wx.login → code2session → token，并发去重
-services/catalog.js      专辑/音频列表，按 catalog_version 版本戳缓存 + 弱网降级
+services/catalog.js      专辑/音频列表，按 catalog_version 版本戳缓存 + 弱网降级；`syncContent()` 拉 bootstrap 层名
 services/history.js      播放进度上报 / 历史列表 / 删除
 services/player.js       ★ 后台音频单例、唯一播放状态源、切歌与进度上报
 services/sleep-timer.js  定时关闭：原生 setShutdown + JS 前台兜底
@@ -41,7 +41,7 @@ pages/history            最近播放 + 续播（tabBar）
 pages/mine               「我的」：成绩单 / 成就徽章（亮暗达成状态 + 8 枚图标）/ 专辑完成度 / 工具（tabBar）
 components/mini-player   全局悬浮播放条
 tests/player-sync.test.js 播放器 / 微信音频条联动回归测试（纯 Node，无依赖）
-tests/mine-module.test.js 「我的」模块 + 品牌配置同步回归测试（纯 Node，无依赖，18 条）
+tests/mine-module.test.js 「我的」模块 + 品牌配置同步 + 内容层名 + 目录缓存回归测试（纯 Node，无依赖，22 条）
 ```
 
 ## 3. 关键实现
@@ -68,6 +68,27 @@ node miniprogram/scripts/sync-brand.js
 - **Logo 两种形态**：`logo.type='mark'`（默认）用 `index.wxss` 的纯 CSS 徽标；`type='image'` 时改读 `logo.image`（建议 PNG，放 `assets/` 填相对路径）。
 - **派生值不用手写**：`tabs[0]` 用 `{name}` 占位、`colors.tabTextActive` 自动跟随 `primary`、徽章墙副标题由「亮 / 暗」两条文案拼出。
 - **换项目的边界**：AppID、工程目录名、页面路径、tabBar 项顺序属于工程结构，仍在 `project.config.json` / `app.json` 里改；微信公众平台的名称需在后台另改（涉及主体审核）。
+
+### 内容层名：服务端改字，小程序自动跟上（v0.13.1）
+
+「专辑 / 音频」这对称呼不是写死的。默认值在 `config/brand.js` 的 `content` 段，**实际以服务端为准**：
+
+```
+服务端 .env：CONTENT_GROUP_NAME=课程 / CONTENT_ITEM_NAME=章节
+      ↓ config/content.php
+GET /api/v1/bootstrap → content: { level_names: { group, item }, max_depth }
+      ↓ services/catalog.js 的 syncContent()（app.onLaunch 触发）
+config/brand.js 的 applyContent() 就地重渲染 titles / copy / badges
+      ↓ 结果同时写入 lb_content
+下次冷启动：模块加载时先读 lb_content 再渲染 → 首屏就是对的文案
+```
+
+- **改文案不用发版**：只在服务端改 `.env` 两项 + `php artisan config:clear`，下一次冷启动生效。
+- **首次启动（本地无缓存）**：先按 `brand.js` 默认值渲染；bootstrap 回来后若层名不同，`app.onLaunch` 会刷新已渲染页面的 `copy` / `titles` / `badgeText`，页面再次 `onShow` 也会重新取值。
+- **`{group}` / `{item}` 占位**：`fill()` 支持这两个占位符，`copy` 与徽章 `rules` 统一用它；WXML 只写 `{{copy.xxx}}` —— 测试会扫 5 个页面模板，出现层名字面量直接失败。
+- **不动的部分**：`/api/v1/albums`、`album_id`、`albums` / `tracks` 表名、`pages/album` 目录、`lb_albums` 缓存键 —— 这些是契约，改了旧版小程序直接挂。
+- **`album.json` 的静态标题**：仍由同步脚本按 `content.group` 的**默认值**生成，运行时被 `album.js` 的 `setNavigationBarTitle` 立刻覆盖成专辑名，实际不可见。
+- **只改了 `brand.js` 的默认值**：照旧先跑 `node miniprogram/scripts/sync-brand.js` 再编译，否则 `app.json` / 页面标题会对不上。
 
 ### 品牌「枕书」与「我的」页边界（v0.12.3）
 
@@ -158,11 +179,11 @@ b.setShutdown('timer', 1);
 
 ```bash
 node miniprogram/tests/player-sync.test.js   # 11/11
-node miniprogram/tests/mine-module.test.js   # 18/18
+node miniprogram/tests/mine-module.test.js   # 22/22
 ```
 
 - `player-sync.test.js` 覆盖：原生暂停/播放后状态对齐、后台进度补报、同曲目续播不回跳、异曲目按历史进度起播、面板切歌、冷启动恢复、起播窗口、stop 后进度不被清零、定时关闭不回归。
-- `mine-module.test.js` 覆盖：起播/节流/seek/回前台事件打点、队列与失败补报、单批 50 条与队列上限、页面正常/错误/空三态、**静态断言真实收听区块已从 WXML 移除且页面不再引用 heatmap**、8 枚徽章亮/暗达成状态与语义化图标规则、**静态断言无主题切换残留**、点击 toast、热力格纯函数保留、清空历史联动、清缓存保留项、**静态断言「我的」页不含继续收听卡片与续播逻辑**、**品牌改名「枕书」全站旧称清零**、**品牌配置与 app.json / 页面 json / brand.wxss / project.config.json 同步且业务代码不硬编码品牌名**、**徽章文案全部来自 `config/brand.js`（含占位符已替换）**。
+- `mine-module.test.js` 覆盖：起播/节流/seek/回前台事件打点、队列与失败补报、单批 50 条与队列上限、页面正常/错误/空三态、**静态断言真实收听区块已从 WXML 移除且页面不再引用 heatmap**、8 枚徽章亮/暗达成状态与语义化图标规则、**静态断言无主题切换残留**、点击 toast、热力格纯函数保留、清空历史联动、清缓存保留项、**静态断言「我的」页不含继续收听卡片与续播逻辑**、**品牌改名「枕书」全站旧称清零**、**品牌配置与 app.json / 页面 json / brand.wxss / project.config.json 同步且业务代码不硬编码品牌名**、**徽章文案全部来自 `config/brand.js`（含占位符已替换）**、**目录缓存版本严格相等才命中，版本前进/回退都重新拉取**。
 
 真机行为仍按第 4 节清单验收。
 

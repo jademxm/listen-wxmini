@@ -72,7 +72,7 @@ Page({
       const done = album.finished_tracks || 0;
       return {
         albumId: album.album_id,
-        title: album.title || '未命名专辑',
+        title: album.title || brand.copy.untitledGroup,
         cover: album.cover_url || '',
         text: done + ' / ' + total + ' 集',
         percent: total ? Math.min(100, Math.round(done / total * 100)) : 0,

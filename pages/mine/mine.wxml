@@ -21,7 +21,7 @@
     </view>
     <view class="score">
       <view class="score-num">{{scores.listenedAlbums}}</view>
-      <view class="muted">听过专辑（张）</view>
+      <view class="muted">{{copy.mineAlbumsLabel}}</view>
     </view>
   </view>
   <view class="hint">累计听完 = 已听完集数的内容总长，按当前上架内容重算。</view>
@@ -58,7 +58,7 @@
     </view>
   </view>
 
-  <view class="section-title">专辑完成度</view>
+  <view class="section-title">{{copy.mineAlbumsSection}}</view>
   <view wx:if="{{albums.length}}" class="card">
     <view wx:for="{{albums}}" wx:key="albumId" class="album-item"
           data-id="{{item.albumId}}" data-title="{{item.title}}" bindtap="onAlbum">

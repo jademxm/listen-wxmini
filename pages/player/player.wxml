@@ -64,6 +64,6 @@
       <view wx:else class="muted timer-note">系统级计时在锁屏 / 切后台后仍然生效。</view>
     </view>
 
-    <view class="card link" bindtap="openAlbum">查看本专辑全部音频 ›</view>
+    <view class="card link" bindtap="openAlbum">{{copy.openGroupTracks}}</view>
   </block>
 </view>
