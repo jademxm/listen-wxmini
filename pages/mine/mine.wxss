@@ -9,8 +9,9 @@
 
 .score-row { display: flex; align-items: center; }
 .score { flex: 1; text-align: center; min-width: 0; }
-.score-num { font-size: 48rpx; font-weight: 500; color: var(--brand-primary); line-height: 1.4; }
-.score-text { font-size: 30rpx; }
+.score-num { font-size: 48rpx; font-weight: 500; color: var(--brand-primary); line-height: 1.4; white-space: nowrap; }
+/* 「累计听完」的数字与左右两列同字号，单位只作跟随的小字，避免整串被缩小后三列不齐 */
+.score-unit { font-size: 22rpx; font-weight: 400; margin-left: 6rpx; opacity: 0.72; }
 
 /* ── 成就徽章墙（v1.2 / CR-02）───────────────────────────────────────────
    亮 = 已达成，暗 = 未达成。页面只有一种浅色主题，没有明暗模式切换。

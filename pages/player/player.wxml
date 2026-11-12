@@ -1,5 +1,8 @@
 <view class="container">
-  <view wx:if="{{!hasTrack}}" class="empty">{{copy.playerEmpty}}</view>
+  <view wx:if="{{!hasTrack}}" class="empty">
+    <view>{{copy.playerEmpty}}</view>
+    <view class="btn ghost" style="margin-top:24rpx" bindtap="onGoCatalog">{{copy.goCatalog}}</view>
+  </view>
 
   <block wx:else>
     <view class="cover-wrap">

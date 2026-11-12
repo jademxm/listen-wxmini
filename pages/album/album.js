@@ -58,6 +58,14 @@ Page({
   playTap(event) {
     const index = Number(event.currentTarget.dataset.index);
     if (!this.data.tracks.length) return;
+    const tapped = this.data.tracks[index];
+    const snap = player.getState();
+    const current = snap.playlist[snap.currentIndex];
+    // 点的是当前正在播放的同一首：直接进详情页保留进度，不重播、不重置进度
+    if (current && current.id === tapped.id && snap.bgmSrc && snap.bgmSrc === current.url) {
+      wx.navigateTo({ url: '/pages/player/player' });
+      return;
+    }
     player.setPlaylist(this.data.tracks, this.data.albumId, this.data.title);
     player.play(index, 0);
     wx.navigateTo({ url: '/pages/player/player' });

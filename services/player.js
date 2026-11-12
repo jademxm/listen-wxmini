@@ -147,7 +147,9 @@ function init() {
   BGM = wx.getBackgroundAudioManager();
   restore();
   sleepTimer.init(BGM, {
-    onStop: () => { state.isPlaying = false; emit('stop'); },
+    // 定时到期直接 stop()，不经过 player.stop()；这里补报一次，
+    // 否则后台场景下回前台 BGM.src 已空，reconcile() 无法再补记最后进度。
+    onStop: () => { flush(); state.isPlaying = false; emit('stop'); },
   });
   bindEvents();
 }
@@ -274,11 +276,14 @@ function next(autoToEnd) {
     emit('stop');
     return;
   }
+  // 只有一集时取模会绕回自己，等于把当前进度倒回 0；直接忽略这次操作
+  if (state.playlist.length <= 1) return;
   play(state.currentIndex + 1, 0);
 }
 
 function prev() {
   if (state.currentTime > 5) { seek(0); return; }
+  if (state.playlist.length <= 1) return;
   play(state.currentIndex - 1, 0);
 }
 

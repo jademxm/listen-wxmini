@@ -352,7 +352,7 @@ async function main() {
     assert.equal(ctx.data.error, '');
     assert.equal(ctx.data.loading, false);
     assert.equal(ctx.data.scores.finishedTracks, 2);
-    assert.equal(ctx.data.scores.finishedContent, '20 分钟');
+    assert.deepEqual(ctx.data.scores.finishedContent, { value: '20', unit: '分钟' });
     assert.equal(ctx.data.listening, undefined, '页面不应再有真实收听数据');
     assert.equal(ctx.data.heatColumns, undefined, '页面不应再有热力格数据');
     assert.equal(ctx.data.badges.length, 8);
@@ -391,6 +391,7 @@ async function main() {
 
     assert.ok(ctx.data.error, '应显示错误');
     assert.equal(ctx.data.scores.finishedTracks, '—', '不能拿旧数字冒充实时值');
+    assert.deepEqual(ctx.data.scores.finishedContent, { value: '—', unit: '' }, '失败态三列同为破折号且不带单位');
     assert.equal(ctx.data.listening, undefined);
     assert.equal(ctx.data.badges.length, 8);
     assert.equal(ctx.data.litCount, 0);
@@ -421,7 +422,7 @@ async function main() {
     await settle();
 
     assert.equal(ctx.data.scores.finishedTracks, 0);
-    assert.equal(ctx.data.scores.finishedContent, '0 分钟');
+    assert.deepEqual(ctx.data.scores.finishedContent, { value: '0', unit: '分钟' });
     assert.equal(ctx.data.litCount, 0);
     assert.equal(ctx.data.heatColumns, undefined);
     assert.ok(ctx.data.badges.every((b) => !b.lit && b.progress === 0));

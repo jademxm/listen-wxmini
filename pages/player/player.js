@@ -125,4 +125,8 @@ Page({
       url: '/pages/album/album?albumId=' + state.albumId + '&title=' + encodeURIComponent(state.albumTitle || ''),
     });
   },
+
+  onGoCatalog() {
+    wx.switchTab({ url: '/pages/index/index' });
+  },
 });

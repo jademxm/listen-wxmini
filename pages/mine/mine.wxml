@@ -16,7 +16,7 @@
       <view class="muted">已听完（集）</view>
     </view>
     <view class="score">
-      <view class="score-num score-text">{{scores.finishedContent}}</view>
+      <view class="score-num"><text>{{scores.finishedContent.value}}</text><text wx:if="{{scores.finishedContent.unit}}" class="score-unit">{{scores.finishedContent.unit}}</text></view>
       <view class="muted">累计听完</view>
     </view>
     <view class="score">
@@ -33,7 +33,6 @@
   <view class="card badge-wall">
     <view class="badge-wall-head">
       <text class="badge-count">{{badgeCountText}}</text>
-      <text class="badge-wall-sub">{{badgeText.wallSub}}</text>
     </view>
     <view class="badge-grid">
       <view wx:for="{{badges}}" wx:key="id"
@@ -51,10 +50,6 @@
         <view class="badge-progress"><view class="badge-progress-inner" style="width:{{item.progress}}%"></view></view>
         <view class="badge-hint">{{item.hint}}</view>
       </view>
-    </view>
-    <view class="badge-legend tone-indigo">
-      <view class="legend-chip is-lit"></view><text class="badge-legend-text">{{badgeText.litLabel}}</text>
-      <view class="legend-chip is-dim"></view><text class="badge-legend-text">{{badgeText.dimLabel}}</text>
     </view>
   </view>
 

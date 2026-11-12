@@ -2,12 +2,12 @@ const statsApi = require('../../services/stats');
 const historyApi = require('../../services/history');
 const player = require('../../services/player');
 const { STORAGE_KEYS } = require('../../services/config');
-const { formatDurationText } = require('../../utils/util');
+const { formatDurationParts } = require('../../utils/util');
 const { EMPTY_STATS, buildBadges } = require('../../utils/badges');
 const { brand, fill } = require('../../config/brand');
 
 const EMPTY_VIEW = {
-  scores: { finishedTracks: '—', finishedContent: '—', listenedAlbums: '—' },
+  scores: { finishedTracks: '—', finishedContent: { value: '—', unit: '' }, listenedAlbums: '—' },
   badges: buildBadges(EMPTY_STATS),
   litCount: 0,
   badgeTotal: 8,
@@ -84,9 +84,10 @@ Page({
     const litCount = badges.filter((badge) => badge.lit).length;
     return {
       scores: {
-        finishedTracks: s.finished_tracks,
-        finishedContent: formatDurationText(s.finished_content_sec),
-        listenedAlbums: s.listened_albums,
+        // 服务端异常返回 null / 字符串时仍显示 0 而不是空白
+        finishedTracks: Number(s.finished_tracks) || 0,
+        finishedContent: formatDurationParts(Number(s.finished_content_sec) || 0),
+        listenedAlbums: Number(s.listened_albums) || 0,
       },
       badges: badges,
       litCount: litCount,

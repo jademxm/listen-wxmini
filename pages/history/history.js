@@ -24,6 +24,11 @@ Page({
     this.load(1);
   },
 
+  // 翻页失败时列表还在，底部错误条要能重试「刚才那一页」，而不是回到第 1 页
+  onRetryMore() {
+    if (!this.data.loading && this.data.hasMore) this.load(this.data.page + 1);
+  },
+
   onReachBottom() {
     if (this.data.hasMore && !this.data.loading) this.load(this.data.page + 1);
   },
@@ -97,9 +102,14 @@ Page({
     catalog.getTracks(item.rawTrack.album_id, false)
       .then((tracks) => {
         wx.hideLoading();
-        let target = 0;
+        // 目标可能已下架或换了专辑：找不到就提示，不能默默播该专辑第 1 集
+        let target = -1;
         for (let i = 0; i < tracks.length; i += 1) {
-          if (tracks[i].id === item.trackId) { target = i; break; }
+          if (Number(tracks[i].id) === Number(item.trackId)) { target = i; break; }
+        }
+        if (target < 0) {
+          wx.showToast({ title: '该记录无法续播', icon: 'none' });
+          return;
         }
         player.setPlaylist(tracks, item.rawTrack.album_id, item.albumTitle);
         player.play(target, item.progressSec);

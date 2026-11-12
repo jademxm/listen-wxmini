@@ -29,7 +29,8 @@
   </view>
 
   <view wx:if="{{loading && list.length}}" class="empty">{{copy.loading}}</view>
-  <view wx:if="{{!hasMore && list.length}}" class="muted" style="text-align:center;padding:20rpx">没有更多了</view>
+  <view wx:elif="{{error && list.length}}" class="muted" style="text-align:center;padding:20rpx" bindtap="onRetryMore">{{error}}，点击重试</view>
+  <view wx:if="{{!hasMore && list.length && !error}}" class="muted" style="text-align:center;padding:20rpx">没有更多了</view>
 </view>
 
 <mini-player />

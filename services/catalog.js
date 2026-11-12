@@ -8,7 +8,8 @@ function tracksKey(albumId) {
 
 function cachedList(key) {
   const cached = wx.getStorageSync(key);
-  return cached && cached.list && cached.list.length ? cached.list : null;
+  // 空列表也是有效缓存：专辑暂无曲目时，弱网降级应返回空态而不是「加载失败」
+  return cached && Array.isArray(cached.list) ? cached.list : null;
 }
 
 /**
@@ -28,13 +29,19 @@ function load(key, path, force) {
     .then((data) => {
       const version = (data && data.catalog_version) || 0;
       const cached = wx.getStorageSync(key);
-      if (!force && version && cached && cached.version === version && cached.list && cached.list.length) {
+      if (!force && version && cached && cached.version === version && Array.isArray(cached.list)) {
         return cached.list;
       }
 
       let listVersion = version;
+      let versionLocked = false;
       return collect(path, 1, [], (meta) => {
-        if (meta.catalog_version) listVersion = meta.catalog_version;
+        // 只认第一页版本：翻页期间若发生 bump，缓存仍是「旧版本 + 旧内容」，
+        // 服务端已涨到新版本，下次严格相等判断会自然重新拉取，不会永久命中混合内容。
+        if (!versionLocked) {
+          if (meta.catalog_version) listVersion = meta.catalog_version;
+          versionLocked = true;
+        }
       }).then((list) => {
         wx.setStorageSync(key, { version: listVersion, list: list });
         return list;
